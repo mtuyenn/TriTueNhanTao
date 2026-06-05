@@ -59,7 +59,7 @@ def main():
     current_dirties = list(initial_dirties)
 
     combo_box = ComboBox(20, 20, 190, 30,
-                         ["BFS 1", "BFS 2 (Optimal)", "DFS 1", "DFS 2 (Optimal)", "IDS 1", "IDS 2 (Optimal)", "UCS", "Greedy", "A*", "IDA*", "Simple Hill Climbing", "Steepest Ascent", "Stochastic HC", "Random Restart HC", "Local Beam Search"], font)
+                         ["BFS 1", "BFS 2 (Optimal)", "DFS 1", "DFS 2 (Optimal)", "IDS 1", "IDS 2 (Optimal)", "UCS", "Greedy", "A*", "IDA*", "Simple Hill Climbing", "Steepest Ascent", "Stochastic HC", "Random Restart HC", "Simulated Annealing", "Local Beam Search"], font)
 
     btn_run = pygame.Rect(220, 20, 100, 30)
     btn_next = pygame.Rect(330, 20, 100, 30)
@@ -124,6 +124,7 @@ def main():
                         elif "Steepest Ascent" in sel: algo_generator = algorithm.steepest_ascent_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Stochastic HC" in sel: algo_generator = algorithm.stochastic_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Random Restart HC" in sel: algo_generator = algorithm.random_restart_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
+                        elif "Simulated Annealing" in sel: algo_generator = algorithm.simulated_annealing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Local Beam Search" in sel: algo_generator = algorithm.local_beam_search(start_state, initial_dirties, current_cols, current_rows)
                         
                         logs.clear()
@@ -161,6 +162,7 @@ def main():
                         elif "Steepest Ascent" in sel: algo_generator = algorithm.steepest_ascent_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Stochastic HC" in sel: algo_generator = algorithm.stochastic_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Random Restart HC" in sel: algo_generator = algorithm.random_restart_hill_climbing(start_state, initial_dirties, current_cols, current_rows)
+                        elif "Simulated Annealing" in sel: algo_generator = algorithm.simulated_annealing(start_state, initial_dirties, current_cols, current_rows)
                         elif "Local Beam Search" in sel: algo_generator = algorithm.local_beam_search(start_state, initial_dirties, current_cols, current_rows)
                         
                         logs.clear()
