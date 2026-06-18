@@ -7,3 +7,8 @@ from .informed_search.a_star import A_star
 from .informed_search.ida_star import IDA_start
 from .hill_climbing import Simple_Hill_Climbing, steepest_ascent_hill_climbing, stochastic_hill_climbing, random_restart_hill_climbing, simulated_annealing
 from .hill_climbing import local_beam_search
+from .sreach_in_complex_environments.unobservable_search import unobservable_search
+from .sreach_in_complex_environments.partialobservation_search import partialobservation_search
+from .sreach_in_complex_environments.and_or_graph_search import and_or_graph_search_generator
+from .CSP.backtracking import HCM_REGIONS, MAP_COLORS, backtracking_map_coloring
+from .CSP.forward_checking import forward_checking_map_coloring
