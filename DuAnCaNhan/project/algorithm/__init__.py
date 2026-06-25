@@ -12,3 +12,5 @@ from .sreach_in_complex_environments.partialobservation_search import partialobs
 from .sreach_in_complex_environments.and_or_graph_search import and_or_graph_search_generator
 from .CSP.backtracking import HCM_REGIONS, MAP_COLORS, backtracking_map_coloring
 from .CSP.forward_checking import forward_checking_map_coloring
+from .CSP.ac3 import ac3_map_coloring
+from .CSP.min_conflicts import min_conflicts_map_coloring
