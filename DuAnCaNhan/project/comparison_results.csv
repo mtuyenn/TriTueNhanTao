@@ -1,0 +1,7 @@
+group,algorithm,time_ms,visited,memory_kb,path_len,success,state,cols,rows,start,dirties,detail
+Đối kháng,Minimax,25.7800,926,1.0547,6,True,Cờ caro,3,3,"(0, 0)","((1, 1), (2, 0), (1, 0))","AI O chọn (1, 0) | điểm 0"
+Đối kháng,Alpha-Beta,8.0523,263,1.0000,6,True,Cờ caro,3,3,"(0, 0)","((1, 1), (2, 0), (1, 0))","AI O chọn (1, 0) | điểm 0"
+Đối kháng,Expectimax,27.1382,926,1.3984,6,True,Cờ caro,3,3,"(0, 0)","((1, 1), (2, 0), (1, 0))","AI O chọn (1, 0) | điểm -93.33"
+Có thông tin,Greedy Search,2.9232,54,21.3672,7,True,Máy hút bụi,3,3,"(2, 1)","((1, 0), (2, 2), (0, 0), (1, 1))","rác ((1, 0), (2, 2), (0, 0), (1, 1))"
+Có thông tin,A*,1.7027,33,9.3105,5,True,Máy hút bụi,3,3,"(2, 1)","((1, 0), (2, 2), (0, 0), (1, 1))","rác ((1, 0), (2, 2), (0, 0), (1, 1))"
+Có thông tin,IDA*,0.7784,6,6.6250,5,True,Máy hút bụi,3,3,"(2, 1)","((1, 0), (2, 2), (0, 0), (1, 1))","rác ((1, 0), (2, 2), (0, 0), (1, 1))"

@@ -1,6 +1,9 @@
 # pyrefly: ignore [missing-import]
+import csv
 import os
 import random
+import time
+import tracemalloc
 
 # pyrefly: ignore [missing-import]
 import pygame
@@ -40,6 +43,7 @@ metric_font = pygame.font.SysFont("segoeui", 24, bold=True)
 COLS, ROWS = 3, 3
 CELL_SIZE = 50
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+COMPARISON_FILE = os.path.join(BASE_DIR, "comparison_results.csv")
 CARO_SIZE = 3
 CARO_WIN_LENGTH = 3
 CARO_CELL_SIZE = 104
@@ -101,6 +105,41 @@ ALGORITHM_OPTIONS = [
     "Minimax",
     "Alpha-Beta",
     "Expectimax",
+    "So sánh thuật toán",
+]
+
+COMPARISON_MODE = "So sánh thuật toán"
+
+COMPARISON_GROUPS = [
+    ("Không thông tin", ["BFS 1", "BFS 2 (Optimized)", "DFS 1", "DFS 2 (Optimized)", "IDS 1", "IDS 2 (Optimized)", "UCS"]),
+    ("Có thông tin", ["Greedy Search", "A*", "IDA*"]),
+    ("Leo đồi", ["Simple Hill Climbing", "Steepest-Ascent Hill Climbing", "Stochastic Hill Climbing", "Random-Restart Hill Climbing", "Simulated Annealing", "Local Beam Search"]),
+    ("Môi trường phức tạp", ["Unobservable Search", "Partial-Observation Search", "AND-OR Graph Search"]),
+    ("CSP", ["Backtracking", "Forward Checking", "AC-3", "Min-Conflicts"]),
+    ("Đối kháng", ["Minimax", "Alpha-Beta", "Expectimax"]),
+]
+
+COMPARISON_METRICS = [
+    ("Thời gian chạy", "time_ms", "ms", BLUE),
+    ("Bộ nhớ sử dụng", "memory_kb", "KB", YELLOW),
+    ("Số node đã xét", "visited", "node", GREEN),
+    ("Độ dài đường đi", "path_len", "bước", RED),
+]
+
+COMPARISON_HEADERS = [
+    "group",
+    "algorithm",
+    "time_ms",
+    "visited",
+    "memory_kb",
+    "path_len",
+    "success",
+    "state",
+    "cols",
+    "rows",
+    "start",
+    "dirties",
+    "detail",
 ]
 
 MAP_ALGORITHMS = {
@@ -117,9 +156,23 @@ ADVERSARIAL_ALGORITHMS = {
 }
 
 
+def is_csp_comparison_group(group_name):
+    return group_name == "CSP"
+
+
+def is_adversarial_comparison_group(group_name):
+    return group_name == "Đối kháng"
+
+
 def draw_text(surface, text, x, y, text_font, color=BLACK, max_width=None):
     label = fit_text(text_font, str(text), max_width) if max_width else str(text)
     surface.blit(text_font.render(label, True, color), (x, y))
+
+
+def draw_centered_text(surface, text, center_x, y, text_font, color=BLACK, max_width=None):
+    label = fit_text(text_font, str(text), max_width) if max_width else str(text)
+    text_surface = text_font.render(label, True, color)
+    surface.blit(text_surface, text_surface.get_rect(midtop=(center_x, y)))
 
 
 def draw_card(surface, rect, title=None, subtitle=None):
@@ -168,8 +221,20 @@ def is_adversarial_mode(selection):
     return selection in ADVERSARIAL_ALGORITHMS
 
 
+def is_comparison_mode(selection):
+    return selection == COMPARISON_MODE
+
+
 def create_caro_board():
     return algorithm.create_caro_board(CARO_SIZE)
+
+
+def create_comparison_caro_board():
+    board = create_caro_board()
+    board[0][0] = "X"
+    board[1][1] = "O"
+    board[0][2] = "X"
+    return board
 
 
 def caro_winner(board):
@@ -187,6 +252,241 @@ def search_caro_move(board, algorithm_name, ai_mark):
 def describe_known_observations(known_positions, dirties):
     dirties = set(dirties)
     return ", ".join(f"{pos}: {'có rác' if pos in dirties else 'không rác'}" for pos in known_positions)
+
+
+def benchmark_algorithm(selection, start_state, dirties, cols, rows, max_steps=50000):
+    if selection in MAP_ALGORITHMS:
+        return benchmark_csp_algorithm(selection, max_steps)
+    if selection in ADVERSARIAL_ALGORITHMS:
+        return benchmark_adversarial_algorithm(selection)
+
+    result = {
+        "algorithm": selection,
+        "time_ms": 0,
+        "visited": 0,
+        "memory_kb": 0,
+        "path_len": 0,
+        "success": False,
+    }
+
+    comparison_cases = build_comparison_cases(selection, start_state, dirties, cols, rows)
+    generator = build_search_generator(selection, start_state, dirties, cols, rows, comparison_cases)
+    max_visited = 0
+    final_path = []
+    success = False
+
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    try:
+        step_count = 0
+        for step in generator:
+            step_count += 1
+            if step_count > max_steps:
+                result["error"] = "Vượt giới hạn bước đo"
+                break
+            explored = step.get("explored", set())
+            frontier = step.get("frontier", [])
+            current = step.get("current")
+            visited_count = len(explored) + len(frontier)
+            if current is not None:
+                visited_count += 1
+            if visited_count > max_visited:
+                max_visited = visited_count
+
+            if step.get("done"):
+                final_path = step.get("path", [])
+                success = len(final_path) > 0
+                break
+    except Exception as exc:
+        result["error"] = str(exc)
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    end_time = time.perf_counter()
+    result["time_ms"] = (end_time - start_time) * 1000
+    result["visited"] = max_visited
+    result["memory_kb"] = peak_mem / 1024
+    result["path_len"] = max(0, len(final_path) - 1)
+    result["success"] = success
+    return result
+
+
+def build_comparison_cases(selection, start_state, dirties, cols, rows):
+    all_positions = [(c, r) for c in range(cols) for r in range(rows)]
+    dirties = tuple(dirties)
+
+    if "Unobservable Search" in selection:
+        cases = []
+        sample_starts = [start_state]
+        for pos in all_positions:
+            if pos != start_state and len(sample_starts) < 3:
+                sample_starts.append(pos)
+        for index, pos in enumerate(sample_starts):
+            guessed = set(dirties)
+            extra_candidates = [p for p in all_positions if p != pos and p not in guessed]
+            if extra_candidates and index % 2 == 1:
+                guessed.add(extra_candidates[0])
+            cases.append({"start_state": pos, "initial_dirties": tuple(sorted(guessed)), "current_dirties": list(sorted(guessed)), "path": [], "path_index": 0, "done": False})
+        return cases
+
+    if "Partial-Observation Search" in selection:
+        observed_positions = all_positions[:min(2, len(all_positions))]
+        known_dirties = [pos for pos in observed_positions if pos in dirties]
+        unknown_positions = [pos for pos in all_positions if pos not in observed_positions and pos != start_state]
+        cases = []
+        for index in range(2):
+            guessed = set(known_dirties)
+            for pos in unknown_positions[index::2]:
+                if pos in dirties or len(guessed) < len(dirties):
+                    guessed.add(pos)
+            cases.append({
+                "start_state": start_state,
+                "initial_dirties": tuple(sorted(guessed)),
+                "current_dirties": list(sorted(guessed)),
+                "known_positions": tuple(observed_positions),
+                "path": [],
+                "path_index": 0,
+                "done": False,
+            })
+        return cases
+
+    return []
+
+
+def benchmark_csp_algorithm(selection, max_steps=50000):
+    result = {
+        "algorithm": selection,
+        "time_ms": 0,
+        "visited": 0,
+        "memory_kb": 0,
+        "path_len": 0,
+        "success": False,
+    }
+    order = list(algorithm.HCM_REGIONS)
+    if selection == "Backtracking":
+        generator = algorithm.backtracking_map_coloring(order)
+    elif selection == "Forward Checking":
+        generator = algorithm.forward_checking_map_coloring(order)
+    elif selection == "AC-3":
+        generator = algorithm.ac3_map_coloring(order)
+    else:
+        generator = algorithm.min_conflicts_map_coloring(order, seed=7)
+
+    visited = 0
+    final_assignments = {}
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    try:
+        for step in generator:
+            visited += 1
+            if visited > max_steps:
+                result["error"] = "Vượt giới hạn bước đo"
+                break
+            final_assignments = step.get("assignments", final_assignments)
+            if step.get("done"):
+                result["success"] = bool(step.get("success"))
+                break
+    except Exception as exc:
+        result["error"] = str(exc)
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    result["time_ms"] = (time.perf_counter() - start_time) * 1000
+    result["visited"] = visited
+    result["memory_kb"] = peak_mem / 1024
+    result["path_len"] = len(final_assignments)
+    result["assignments"] = dict(final_assignments)
+    result["state"] = "Bản đồ TP.HCM"
+    return result
+
+
+def benchmark_adversarial_algorithm(selection):
+    result = {
+        "algorithm": selection,
+        "time_ms": 0,
+        "visited": 0,
+        "memory_kb": 0,
+        "path_len": 0,
+        "success": False,
+    }
+    board = create_comparison_caro_board()
+    ai_mark = "O"
+    result["state"] = "Cờ caro"
+    result["board"] = [row[:] for row in board]
+
+    tracemalloc.start()
+    start_time = time.perf_counter()
+    try:
+        move, score, nodes = search_caro_move(board, selection, ai_mark)
+        result["success"] = move is not None
+        result["visited"] = nodes
+        result["path_len"] = len([cell for row in board for cell in row if not cell])
+        result["score"] = score
+        result["move"] = move
+        result["board"] = [row[:] for row in board]
+        result["state"] = "Cờ caro"
+    except Exception as exc:
+        result["error"] = str(exc)
+    current_mem, peak_mem = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+
+    result["time_ms"] = (time.perf_counter() - start_time) * 1000
+    result["memory_kb"] = peak_mem / 1024
+    return result
+
+
+def get_comparison_algorithms(group_name):
+    for name, algorithm_names in COMPARISON_GROUPS:
+        if name == group_name:
+            return algorithm_names
+    return COMPARISON_GROUPS[0][1]
+
+
+def save_comparison_results(results, group_name, start_state, dirties, cols, rows):
+    should_write_header = not os.path.exists(COMPARISON_FILE) or os.path.getsize(COMPARISON_FILE) == 0
+    with open(COMPARISON_FILE, "a", newline="", encoding="utf-8") as file:
+        writer = csv.writer(file)
+        if should_write_header:
+            writer.writerow(COMPARISON_HEADERS)
+        for item in results:
+            state_name = item.get("state", "Máy hút bụi")
+            detail = ""
+            if is_csp_comparison_group(group_name):
+                detail = f"{len(item.get('assignments', {}))}/{len(algorithm.HCM_REGIONS)} vùng đã tô"
+            elif is_adversarial_comparison_group(group_name):
+                detail = f"AI O chọn {item.get('move')} | điểm {item.get('score', '')}"
+            else:
+                detail = f"rác {tuple(dirties)}"
+            writer.writerow([
+                group_name,
+                item.get("algorithm", ""),
+                f"{item.get('time_ms', 0):.4f}",
+                item.get("visited", 0),
+                f"{item.get('memory_kb', 0):.4f}",
+                item.get("path_len", 0),
+                item.get("success", False),
+                state_name,
+                cols,
+                rows,
+                start_state,
+                tuple(dirties),
+                detail,
+            ])
+
+
+def benchmark_algorithm_groups(start_state, dirties, cols, rows, group_name=None):
+    results = []
+    if group_name is None:
+        selected_groups = COMPARISON_GROUPS
+    else:
+        selected_groups = [(group_name, get_comparison_algorithms(group_name))]
+
+    for selected_group_name, algorithm_names in selected_groups:
+        for algorithm_name in algorithm_names:
+            item = benchmark_algorithm(algorithm_name, start_state, dirties, cols, rows)
+            item["group"] = selected_group_name
+            results.append(item)
+    return results
 
 
 def build_search_generator(selection, start_state, initial_dirties, cols, rows, simulation_cases):
@@ -337,6 +637,335 @@ def draw_case_statuses(surface, rect, cases):
     surface.set_clip(previous_clip)
 
 
+def draw_comparison_table(surface, rect, results):
+    draw_card(surface, rect, "So sánh nhóm thuật toán")
+    draw_text(surface, "Chạy trên cùng trạng thái sàn hiện tại", rect.x + 18, rect.y + 42, small_font, MUTED, rect.w - 36)
+
+    if not results:
+        draw_text(surface, "Nhấn Tự động để bắt đầu đo thời gian, node đã thăm và bộ nhớ.", rect.x + 18, rect.y + 92, font, MUTED, rect.w - 36)
+        return
+
+    headers = ["Nhóm", "Thuật toán", "Thời gian", "Node", "Bộ nhớ", "Độ dài", "KQ"]
+    widths = [132, 210, 100, 82, 92, 72, 70]
+    x = rect.x + 18
+    y = rect.y + 78
+
+    col_x = x
+    for index, header in enumerate(headers):
+        draw_text(surface, header, col_x, y, small_font, MUTED, widths[index] - 8)
+        col_x += widths[index]
+    pygame.draw.line(surface, BORDER, (x, y + 26), (rect.right - 18, y + 26), 1)
+
+    y += 38
+    for item in results[:12]:
+        col_x = x
+        success_text = "OK" if item.get("success") else "Fail"
+        values = [
+            item.get("group", ""),
+            item.get("algorithm", ""),
+            f"{item.get('time_ms', 0):.2f} ms",
+            str(item.get("visited", 0)),
+            f"{item.get('memory_kb', 0):.1f} KB",
+            str(item.get("path_len", 0)),
+            success_text,
+        ]
+        for index, value in enumerate(values):
+            color = GREEN if index == 6 and success_text == "OK" else RED if index == 6 else BLACK
+            draw_text(surface, value, col_x, y, small_font, color, widths[index] - 8)
+            col_x += widths[index]
+        y += 28
+
+
+def draw_vacuum_comparison_state(surface, rect, start_state, dirties, cols, rows):
+    draw_text(surface, "Trạng thái so sánh", rect.x, rect.y, section_font, BLACK, rect.w)
+    cell = min(42, (rect.w - 8) // cols, (rect.h - 46) // rows)
+    grid_w = cols * cell
+    grid_h = rows * cell
+    origin_x = rect.x + (rect.w - grid_w) // 2
+    origin_y = rect.y + 42
+    dirties = set(dirties)
+
+    for r in range(rows):
+        for c in range(cols):
+            cell_rect = pygame.Rect(origin_x + c * cell, origin_y + r * cell, cell, cell)
+            if USE_IMAGES:
+                tile = img_dirty_floor if (c, r) in dirties else img_clean_floor
+                tile = pygame.transform.scale(tile, (cell, cell))
+                surface.blit(tile, cell_rect)
+            else:
+                pygame.draw.rect(surface, RED if (c, r) in dirties else GREEN, cell_rect)
+            pygame.draw.rect(surface, (148, 163, 184), cell_rect, 1)
+            if (c, r) == start_state:
+                if USE_IMAGES:
+                    robot = pygame.transform.scale(img_robot, (cell - 8, cell - 8))
+                    surface.blit(robot, (cell_rect.x + 4, cell_rect.y + 4))
+                else:
+                    pygame.draw.circle(surface, BLUE, cell_rect.center, max(8, cell // 3))
+
+
+def draw_map_comparison_state(surface, rect, results):
+    draw_text(surface, "Trạng thái so sánh", rect.x, rect.y, section_font, BLACK, rect.w)
+    draw_text(surface, "CSP: tô màu bản đồ TP.HCM", rect.x, rect.y + 30, small_font, MUTED, rect.w)
+
+    assignments = {}
+    for item in results:
+        candidate = item.get("assignments", {})
+        if len(candidate) > len(assignments):
+            assignments = candidate
+
+    map_area = pygame.Rect(rect.x, rect.y + 58, rect.w, rect.h - 98)
+    if HCM_MAP_RENDERER is None:
+        draw_text(surface, "Không thể tải bản đồ TP.HCM", map_area.x, map_area.y + 24, font, RED, map_area.w)
+    else:
+        map_surface = HCM_MAP_RENDERER.render(assignments)
+        source_w, source_h = map_surface.get_size()
+        scale = min(map_area.w / source_w, map_area.h / source_h)
+        display_size = (max(1, int(source_w * scale)), max(1, int(source_h * scale)))
+        display_surface = pygame.transform.smoothscale(map_surface, display_size)
+        surface.blit(display_surface, display_surface.get_rect(center=map_area.center))
+
+    draw_text(surface, f"Vùng: {len(algorithm.HCM_REGIONS)}", rect.x, rect.bottom - 32, small_font, MUTED, 74)
+    draw_text(surface, f"Đã tô: {len(assignments)}", rect.x + 82, rect.bottom - 32, small_font, GREEN if assignments else MUTED, 72)
+    for index, (_, color_rgb) in enumerate(algorithm.MAP_COLORS):
+        swatch_x = rect.right - 78 + index * 18
+        pygame.draw.rect(surface, color_rgb, (swatch_x, rect.bottom - 34, 14, 14), border_radius=3)
+        pygame.draw.rect(surface, BORDER, (swatch_x, rect.bottom - 34, 14, 14), 1, border_radius=3)
+
+
+def draw_caro_comparison_state(surface, rect, results):
+    draw_text(surface, "Trạng thái so sánh", rect.x, rect.y, section_font, BLACK, rect.w)
+    draw_text(surface, "Đối kháng: cờ caro", rect.x, rect.y + 30, small_font, MUTED, rect.w)
+
+    board = create_comparison_caro_board()
+    move = None
+    if results:
+        board = [row[:] for row in results[0].get("board", board)]
+        move = results[0].get("move")
+
+    cell = min(56, (rect.w - 10) // CARO_SIZE, (rect.h - 88) // CARO_SIZE)
+    board_px = cell * CARO_SIZE
+    board_rect = pygame.Rect(rect.x + (rect.w - board_px) // 2, rect.y + 64, board_px, board_px)
+    pygame.draw.rect(surface, (248, 250, 252), board_rect, border_radius=8)
+    pygame.draw.rect(surface, BORDER, board_rect, 2, border_radius=8)
+
+    for i in range(1, CARO_SIZE):
+        x = board_rect.x + i * cell
+        y = board_rect.y + i * cell
+        pygame.draw.line(surface, (148, 163, 184), (x, board_rect.y), (x, board_rect.bottom), 2)
+        pygame.draw.line(surface, (148, 163, 184), (board_rect.x, y), (board_rect.right, y), 2)
+
+    if move:
+        c, r = move
+        highlight = pygame.Rect(board_rect.x + c * cell + 5, board_rect.y + r * cell + 5, cell - 10, cell - 10)
+        pygame.draw.rect(surface, (219, 234, 254), highlight, border_radius=6)
+
+    for r in range(CARO_SIZE):
+        for c in range(CARO_SIZE):
+            mark = board[r][c]
+            if not mark:
+                continue
+            mark_rect = pygame.Rect(board_rect.x + c * cell + 7, board_rect.y + r * cell + 7, cell - 14, cell - 14)
+            if USE_CARO_IMAGES:
+                image = img_x if mark == "X" else img_o
+                surface.blit(pygame.transform.smoothscale(image, mark_rect.size), mark_rect)
+            else:
+                draw_centered_text(surface, mark, mark_rect.centerx, mark_rect.y + 4, metric_font, BLUE if mark == "X" else RED, mark_rect.w)
+
+    status = "Lượt AI: O"
+    if results and move:
+        status = f"Nước gợi ý: ({move[0] + 1}, {move[1] + 1})"
+    draw_centered_text(surface, status, rect.centerx, rect.bottom - 28, small_font, MUTED, rect.w)
+
+
+def draw_comparison_state(surface, rect, group_name, results, start_state, dirties, cols, rows):
+    if is_csp_comparison_group(group_name):
+        draw_map_comparison_state(surface, rect, results)
+        return
+    if is_adversarial_comparison_group(group_name):
+        draw_caro_comparison_state(surface, rect, results)
+        return
+    draw_vacuum_comparison_state(surface, rect, start_state, dirties, cols, rows)
+
+
+def draw_comparison_chart(surface, rect, results):
+    draw_text(surface, "Biểu đồ minh họa", rect.x, rect.y, section_font, BLACK, rect.w)
+    if not results:
+        return
+
+    max_time = max(item.get("time_ms", 0) for item in results) or 1
+    max_node = max(item.get("visited", 0) for item in results) or 1
+    max_mem = max(item.get("memory_kb", 0) for item in results) or 1
+    row_y = rect.y + 38
+    bar_w = max(40, rect.w - 150)
+
+    for item in results[:6]:
+        name = item.get("algorithm", "")
+        draw_text(surface, name, rect.x, row_y, small_font, BLACK, 132)
+        time_w = int(bar_w * item.get("time_ms", 0) / max_time)
+        node_w = int(bar_w * item.get("visited", 0) / max_node)
+        mem_w = int(bar_w * item.get("memory_kb", 0) / max_mem)
+        pygame.draw.rect(surface, BLUE, (rect.x + 140, row_y, time_w, 5), border_radius=2)
+        pygame.draw.rect(surface, GREEN, (rect.x + 140, row_y + 8, node_w, 5), border_radius=2)
+        pygame.draw.rect(surface, YELLOW, (rect.x + 140, row_y + 16, mem_w, 5), border_radius=2)
+        row_y += 30
+
+    legend_y = rect.bottom - 20
+    pygame.draw.rect(surface, BLUE, (rect.x, legend_y, 12, 8), border_radius=2)
+    draw_text(surface, "Thời gian", rect.x + 18, legend_y - 4, small_font, MUTED, 78)
+    pygame.draw.rect(surface, GREEN, (rect.x + 104, legend_y, 12, 8), border_radius=2)
+    draw_text(surface, "Node", rect.x + 122, legend_y - 4, small_font, MUTED, 50)
+    pygame.draw.rect(surface, YELLOW, (rect.x + 174, legend_y, 12, 8), border_radius=2)
+    draw_text(surface, "Bộ nhớ", rect.x + 192, legend_y - 4, small_font, MUTED, 70)
+
+
+def draw_single_bar_chart(surface, rect, results, title, key, unit, color):
+    pygame.draw.rect(surface, (248, 250, 252), rect, border_radius=8)
+    pygame.draw.rect(surface, BORDER, rect, 1, border_radius=8)
+    draw_text(surface, title, rect.x + 14, rect.y + 10, small_font, BLACK, rect.w - 28)
+    if not results:
+        return
+
+    values = [item.get(key, 0) for item in results]
+    max_value = max(values) or 1
+    chart_top = rect.y + 42
+    chart_bottom = rect.bottom - 38
+    chart_h = max(20, chart_bottom - chart_top)
+    bar_count = len(results)
+    gap = 16
+    bar_w = max(24, min(64, (rect.w - gap * (bar_count + 1)) // bar_count))
+    total_w = bar_count * bar_w + (bar_count - 1) * gap
+    start_x = rect.x + (rect.w - total_w) // 2
+
+    pygame.draw.line(surface, BORDER, (rect.x + 14, chart_bottom), (rect.right - 14, chart_bottom), 1)
+    pygame.draw.line(surface, BORDER, (rect.x + 14, chart_top), (rect.right - 14, chart_top), 1)
+    draw_text(surface, f"max {max_value:.1f}" if unit in ("ms", "KB") else f"max {int(max_value)}", rect.right - 112, rect.y + 10, small_font, MUTED, 96)
+
+    for index, item in enumerate(results):
+        value = item.get(key, 0)
+        bar_h = max(4, int(chart_h * value / max_value))
+        x = start_x + index * (bar_w + gap)
+        y = chart_bottom - bar_h
+        pygame.draw.rect(surface, (226, 232, 240), (x, chart_top, bar_w, chart_h), border_radius=4)
+        pygame.draw.rect(surface, color, (x, y, bar_w, bar_h), border_radius=4)
+
+        if unit == "ms":
+            value_text = f"{value:.1f}"
+        elif unit == "KB":
+            value_text = f"{value:.0f}"
+        else:
+            value_text = str(int(value))
+        label_y = max(chart_top + 3, y - 20)
+        draw_text(surface, value_text, x - 6, label_y, small_font, BLACK, bar_w + 12)
+
+        name = item.get("algorithm", "")
+        short_name = name.replace(" (Optimized)", "")
+        short_name = short_name.replace("Search", "")
+        draw_text(surface, short_name, x - 12, chart_bottom + 8, small_font, MUTED, bar_w + 24)
+
+
+def get_comparison_metric(metric_name):
+    for metric in COMPARISON_METRICS:
+        if metric[0] == metric_name:
+            return metric
+    return COMPARISON_METRICS[0]
+
+
+def format_chart_value(value, unit):
+    if unit == "ms":
+        return f"{value:.2f}"
+    if unit == "KB":
+        return f"{value:.1f}"
+    return str(int(value))
+
+
+def shorten_algorithm_name(name):
+    short_name = name.replace(" (Optimized)", "")
+    short_name = short_name.replace("Simple ", "")
+    short_name = short_name.replace("Steepest-Ascent ", "Steepest ")
+    short_name = short_name.replace("Random-Restart ", "Restart ")
+    short_name = short_name.replace("Stochastic ", "Stoch. ")
+    short_name = short_name.replace("Simulated Annealing", "Anneal")
+    short_name = short_name.replace("Local Beam Search", "Beam")
+    short_name = short_name.replace("Greedy Search", "Greedy")
+    short_name = short_name.replace("Unobservable Search", "Unobservable")
+    short_name = short_name.replace("Partial-Observation Search", "Partial")
+    short_name = short_name.replace("AND-OR Graph Search", "AND-OR")
+    short_name = short_name.replace("Forward Checking", "Forward")
+    short_name = short_name.replace("Min-Conflicts", "MinConf")
+    short_name = short_name.replace("Alpha-Beta", "AlphaBeta")
+    return short_name
+
+
+def draw_main_comparison_chart(surface, rect, results, metric_name):
+    metric_label, key, unit, color = get_comparison_metric(metric_name)
+    pygame.draw.rect(surface, (248, 250, 252), rect, border_radius=8)
+    pygame.draw.rect(surface, BORDER, rect, 1, border_radius=8)
+    draw_text(surface, f"{metric_label} ({unit})", rect.x + 18, rect.y + 14, section_font, BLACK, rect.w - 36)
+
+    if not results:
+        draw_text(surface, "Nhấn So sánh để đo dữ liệu rồi vẽ biểu đồ.", rect.x + 18, rect.y + 72, font, MUTED, rect.w - 36)
+        return
+
+    values = [float(item.get(key, 0) or 0) for item in results]
+    max_value = max(values) or 1
+    axis_max = max_value * 1.15 if max_value > 0 else 1
+
+    chart_left = rect.x + 78
+    chart_right = rect.right - 34
+    chart_top = rect.y + 72
+    chart_bottom = rect.bottom - 76
+    chart_w = max(100, chart_right - chart_left)
+    chart_h = max(100, chart_bottom - chart_top)
+
+    pygame.draw.line(surface, (148, 163, 184), (chart_left, chart_top), (chart_left, chart_bottom), 2)
+    pygame.draw.line(surface, (148, 163, 184), (chart_left, chart_bottom), (chart_right, chart_bottom), 2)
+
+    for tick in range(5):
+        ratio = tick / 4
+        y = chart_bottom - int(chart_h * ratio)
+        value = axis_max * ratio
+        pygame.draw.line(surface, (226, 232, 240), (chart_left, y), (chart_right, y), 1)
+        draw_text(surface, format_chart_value(value, unit), rect.x + 16, y - 9, small_font, MUTED, chart_left - rect.x - 24)
+
+    bar_count = len(results)
+    slot_w = chart_w / max(1, bar_count)
+    bar_w = max(26, min(72, int(slot_w * 0.58)))
+
+    for index, item in enumerate(results):
+        value = float(item.get(key, 0) or 0)
+        bar_h = int(chart_h * value / axis_max) if axis_max else 0
+        bar_h = max(4 if value > 0 else 0, bar_h)
+        center_x = chart_left + int(slot_w * index + slot_w / 2)
+        x = center_x - bar_w // 2
+        y = chart_bottom - bar_h
+
+        pygame.draw.rect(surface, (241, 245, 249), (x, chart_top, bar_w, chart_h), border_radius=6)
+        if bar_h:
+            pygame.draw.rect(surface, color, (x, y, bar_w, bar_h), border_radius=6)
+
+        value_text = f"{format_chart_value(value, unit)} {unit}"
+        draw_centered_text(surface, value_text, center_x, max(chart_top + 4, y - 24), small_font, BLACK, max(72, int(slot_w) - 8))
+
+        name = shorten_algorithm_name(item.get("algorithm", ""))
+        label_w = max(54, int(slot_w) - 6)
+        draw_centered_text(surface, name, center_x, chart_bottom + 14, small_font, MUTED, label_w)
+
+    draw_centered_text(surface, "Thuật toán", chart_left + chart_w // 2, rect.bottom - 34, small_font, MUTED, 120)
+    draw_text(surface, f"Trục Y: {metric_label}", chart_left, rect.y + 44, small_font, MUTED, chart_w)
+    draw_text(surface, f"max dữ liệu {format_chart_value(max_value, unit)} {unit}", rect.right - 190, rect.y + 44, small_font, MUTED, 172)
+
+
+def draw_comparison_screen(surface, rect, results, group_name, metric_name, start_state, dirties, cols, rows):
+    draw_card(surface, rect, "So sánh nhóm thuật toán")
+    draw_text(surface, f"Nhóm: {group_name} | Dữ liệu lưu tại comparison_results.csv", rect.x + 18, rect.y + 42, small_font, MUTED, rect.w - 36)
+
+    state_rect = pygame.Rect(rect.x + 24, rect.y + 86, 230, 250)
+    chart_rect = pygame.Rect(rect.x + 286, rect.y + 86, rect.w - 322, rect.h - 128)
+    draw_comparison_state(surface, state_rect, group_name, results, start_state, dirties, cols, rows)
+    draw_text(surface, "Tiêu chí biểu đồ", rect.x + 24, rect.y + 374, small_font, MUTED, 230)
+    draw_main_comparison_chart(surface, chart_rect, results, metric_name)
+
+
 def draw_caro_board(surface, rect, board, last_move=None):
     draw_card(surface, rect, "Mô phỏng cờ caro")
     board_px = CARO_SIZE * CARO_CELL_SIZE
@@ -417,9 +1046,12 @@ def main():
     start_state, initial_dirties = get_random_states(current_cols, current_rows)
 
     combo_box = ComboBox(24, 54, 330, 36, ALGORITHM_OPTIONS, font)
+    comparison_group_box = ComboBox(504, 54, 250, 36, [group[0] for group in COMPARISON_GROUPS], font)
+    comparison_metric_box = ComboBox(48, 530, 230, 36, [metric[0] for metric in COMPARISON_METRICS], font)
     btn_run = pygame.Rect(374, 54, 118, 36)
     btn_next = pygame.Rect(504, 54, 118, 36)
     btn_random = pygame.Rect(634, 54, 150, 36)
+    btn_compare_random = pygame.Rect(774, 54, 150, 36)
     btn_caro_x = pygame.Rect(504, 54, 58, 36)
     btn_caro_o = pygame.Rect(574, 54, 58, 36)
     input_cols = InputBox(828, 54, 58, 36, str(current_cols), font, label="Cột")
@@ -433,6 +1065,7 @@ def main():
     partial_bs_positions = []
     final_path = []
     unobservable_paths = []
+    comparison_results = []
     logs = [f"Sẵn sàng: bắt đầu {start_state}, số ô rác {len(initial_dirties)}"]
     log_offset = 0
 
@@ -666,6 +1299,7 @@ def main():
         selection = combo_box.get_selected()
         map_mode = is_map_coloring_mode(selection)
         adversarial_mode = is_adversarial_mode(selection)
+        comparison_mode = is_comparison_mode(selection)
         uncertain_mode = "Unobservable Search" in selection or "Partial-Observation Search" in selection
 
         for event in pygame.event.get():
@@ -675,7 +1309,22 @@ def main():
             previous_selection = combo_box.get_selected()
             combo_used = combo_box.handle_event(event)
             selection_changed = combo_box.get_selected() != previous_selection
-            if not combo_used and not adversarial_mode:
+            group_used = False
+            previous_group = comparison_group_box.get_selected()
+            if comparison_mode and not combo_used:
+                group_used = comparison_group_box.handle_event(event)
+                if comparison_group_box.get_selected() != previous_group:
+                    comparison_results = []
+                    logs = [f"Đã chọn nhóm so sánh: {comparison_group_box.get_selected()}"]
+                    log_offset = 0
+            metric_used = False
+            previous_metric = comparison_metric_box.get_selected()
+            if comparison_mode and not combo_used and not group_used:
+                metric_used = comparison_metric_box.handle_event(event)
+                if comparison_metric_box.get_selected() != previous_metric:
+                    logs = [f"Đã chọn tiêu chí biểu đồ: {comparison_metric_box.get_selected()}"]
+                    log_offset = 0
+            if not combo_used and not group_used and not metric_used and not adversarial_mode and not comparison_mode:
                 input_cols.handle_event(event)
                 input_rows.handle_event(event)
 
@@ -684,6 +1333,7 @@ def main():
                 phase = PHASE_IDLE
                 final_path = []
                 unobservable_paths = []
+                comparison_results = []
                 reset_cases()
                 logs = [f"Đã chọn {combo_box.get_selected()}. Nhấn Tự động hoặc Bước tiếp."]
                 if "Partial-Observation Search" in combo_box.get_selected() and partial_bs_positions:
@@ -695,7 +1345,7 @@ def main():
                     reset_caro()
                 log_offset = 0
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not combo_box.active:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1 and not combo_box.active and not comparison_group_box.active and not comparison_metric_box.active:
                 if adversarial_mode:
                     if btn_run.collidepoint(event.pos):
                         reset_caro()
@@ -708,12 +1358,19 @@ def main():
                     continue
 
                 if btn_run.collidepoint(event.pos):
-                    is_running_auto = not is_running_auto
+                    if comparison_mode:
+                        selected_group = comparison_group_box.get_selected()
+                        comparison_results = benchmark_algorithm_groups(start_state, initial_dirties, current_cols, current_rows, selected_group)
+                        save_comparison_results(comparison_results, selected_group, start_state, initial_dirties, current_cols, current_rows)
+                        logs = [f"Đã so sánh {len(comparison_results)} thuật toán nhóm {selected_group}.", f"Đã lưu thêm dữ liệu vào {COMPARISON_FILE}"]
+                        log_offset = 0
+                    else:
+                        is_running_auto = not is_running_auto
                     if map_mode and is_running_auto and (phase == PHASE_IDLE or map_done):
                         reset_map_coloring(preserve_order=True)
                         phase = PHASE_EXECUTE
                         logs.clear()
-                    elif is_running_auto and phase == PHASE_IDLE and initial_dirties:
+                    elif (not comparison_mode) and is_running_auto and phase == PHASE_IDLE and initial_dirties:
                         run_selected_algorithm()
 
                 if btn_next.collidepoint(event.pos) and not is_running_auto:
@@ -723,17 +1380,23 @@ def main():
                             phase = PHASE_EXECUTE
                             logs.clear()
                         advance_map_coloring()
-                    elif phase == PHASE_IDLE and initial_dirties:
+                    elif (not comparison_mode) and phase == PHASE_IDLE and initial_dirties:
                         run_selected_algorithm()
                     elif phase == PHASE_EXECUTE:
                         step_simulation(auto=False)
 
-                if btn_random.collidepoint(event.pos):
+                random_clicked = btn_compare_random.collidepoint(event.pos) if comparison_mode else btn_random.collidepoint(event.pos)
+                if random_clicked:
                     is_running_auto = False
                     phase = PHASE_IDLE
                     final_path = []
                     unobservable_paths = []
-                    if map_mode:
+                    comparison_results = []
+                    if comparison_mode and is_csp_comparison_group(comparison_group_box.get_selected()):
+                        logs = ["Nhóm CSP dùng trạng thái so sánh cố định: bản đồ TP.HCM."]
+                    elif comparison_mode and is_adversarial_comparison_group(comparison_group_box.get_selected()):
+                        logs = ["Nhóm đối kháng dùng trạng thái so sánh cố định: bàn cờ caro."]
+                    elif map_mode:
                         reset_map_coloring(shuffle_order=True)
                         logs = ["Đã đảo thứ tự tô màu các vùng."]
                     else:
@@ -748,7 +1411,7 @@ def main():
                             logs.append(f"Agent biết trước: {describe_known_observations(partial_bs_positions, initial_dirties)}")
                     log_offset = 0
 
-            if event.type == pygame.MOUSEWHEEL and not combo_box.active:
+            if event.type == pygame.MOUSEWHEEL and not combo_box.active and not comparison_mode:
                 mouse_pos = pygame.mouse.get_pos()
                 if 24 <= mouse_pos[0] <= 1156 and 570 <= mouse_pos[1] <= 740:
                     log_offset += event.y
@@ -769,15 +1432,26 @@ def main():
             draw_button(screen, btn_run, "Reset", YELLOW, BLACK)
             draw_button(screen, btn_caro_x, "X", BLUE if caro_user_mark == "X" else GRAY, WHITE if caro_user_mark == "X" else BLACK)
             draw_button(screen, btn_caro_o, "O", RED if caro_user_mark == "O" else GRAY, WHITE if caro_user_mark == "O" else BLACK)
+        elif comparison_mode:
+            draw_button(screen, btn_run, "So sánh", GREEN, WHITE)
+            comparison_group_box.draw(screen)
+            compare_random_label = "Cố định" if (
+                is_csp_comparison_group(comparison_group_box.get_selected())
+                or is_adversarial_comparison_group(comparison_group_box.get_selected())
+            ) else "Ngẫu nhiên"
+            draw_button(screen, btn_compare_random, compare_random_label, YELLOW, BLACK)
         else:
             draw_button(screen, btn_run, "Dừng" if is_running_auto else "Tự động", RED if is_running_auto else GREEN, WHITE)
             draw_button(screen, btn_next, "Bước tiếp", BLUE, WHITE)
             draw_button(screen, btn_random, "Đảo thứ tự" if map_mode else "Ngẫu nhiên", YELLOW, BLACK)
-        if not map_mode and not adversarial_mode:
+        if not map_mode and not adversarial_mode and not comparison_mode:
             input_cols.draw(screen)
             input_rows.draw(screen)
 
-        if map_mode:
+        if comparison_mode:
+            table_rect = pygame.Rect(24, 124, 1132, 616)
+            draw_comparison_screen(screen, table_rect, comparison_results, comparison_group_box.get_selected(), comparison_metric_box.get_selected(), start_state, initial_dirties, current_cols, current_rows)
+        elif map_mode:
             map_rect = pygame.Rect(24, 124, 700, 424)
             side_rect = pygame.Rect(748, 124, 408, 424)
             draw_card(screen, map_rect, "Tô màu bản đồ TP.HCM", selection)
@@ -848,8 +1522,12 @@ def main():
             else:
                 draw_timeline(screen, pygame.Rect(side_rect.x + 18, side_rect.y + 220, side_rect.w - 36, 204), case0 or {}, initial_dirties, phase)
 
-        draw_logs(screen, pygame.Rect(24, 570, 1132, 170), logs, log_offset)
+        if not comparison_mode:
+            draw_logs(screen, pygame.Rect(24, 570, 1132, 170), logs, log_offset)
         combo_box.draw(screen)
+        if comparison_mode:
+            comparison_group_box.draw(screen)
+            comparison_metric_box.draw(screen)
 
         pygame.display.flip()
         clock.tick(60)
