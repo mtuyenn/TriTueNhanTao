@@ -144,13 +144,13 @@ DuAnCaNhan/project/
 
 | Thuật toán | GIF |
 |---|---|
-| BFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/bfs1.gif" width="420" alt="BFS 1"> |
-| BFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/bfs2.gif" width="420" alt="BFS 2"> |
-| DFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/dfs1.gif" width="420" alt="DFS 1"> |
-| DFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/dfs2.gif" width="420" alt="DFS 2"> |
-| IDS 1 | <img src="DuAnCaNhan/project/assets/gif/1/ids1.gif" width="420" alt="IDS 1"> |
-| IDS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/ids2.gif" width="420" alt="IDS 2"> |
-| UCS | <img src="DuAnCaNhan/project/assets/gif/1/ucs.gif" width="420" alt="UCS"> |
+| BFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/bfs1.gif" width="760" alt="BFS 1"> |
+| BFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/bfs2.gif" width="760" alt="BFS 2"> |
+| DFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/dfs1.gif" width="760" alt="DFS 1"> |
+| DFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/dfs2.gif" width="760" alt="DFS 2"> |
+| IDS 1 | <img src="DuAnCaNhan/project/assets/gif/1/ids1.gif" width="760" alt="IDS 1"> |
+| IDS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/ids2.gif" width="760" alt="IDS 2"> |
+| UCS | <img src="DuAnCaNhan/project/assets/gif/1/ucs.gif" width="760" alt="UCS"> |
 
 #### So sánh thuật toán
 
@@ -189,9 +189,9 @@ Nhóm này sử dụng heuristic để ưu tiên trạng thái có triển vọn
 
 | Thuật toán | GIF |
 |---|---|
-| Greedy Search | <img src="DuAnCaNhan/project/assets/gif/2/greedy.gif" width="420" alt="Greedy Search"> |
-| A* | <img src="DuAnCaNhan/project/assets/gif/2/a_star.gif" width="420" alt="A star"> |
-| IDA* | <img src="DuAnCaNhan/project/assets/gif/2/ida_star.gif" width="420" alt="IDA star"> |
+| Greedy Search | <img src="DuAnCaNhan/project/assets/gif/2/greedy.gif" width="760" alt="Greedy Search"> |
+| A* | <img src="DuAnCaNhan/project/assets/gif/2/a_star.gif" width="760" alt="A star"> |
+| IDA* | <img src="DuAnCaNhan/project/assets/gif/2/ida_star.gif" width="760" alt="IDA star"> |
 
 #### So sánh thuật toán
 
@@ -228,12 +228,12 @@ Nhóm này cải thiện trạng thái hiện tại theo heuristic thay vì mở
 
 | Thuật toán | GIF |
 |---|---|
-| Simple Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/simple.gif" width="420" alt="Simple Hill Climbing"> |
-| Steepest-Ascent Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/steepes.gif" width="420" alt="Steepest Hill Climbing"> |
-| Stochastic Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/stochastic.gif" width="420" alt="Stochastic Hill Climbing"> |
-| Random-Restart Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/random_restart.gif" width="420" alt="Random Restart Hill Climbing"> |
-| Simulated Annealing | <img src="DuAnCaNhan/project/assets/gif/3/simulated.gif" width="420" alt="Simulated Annealing"> |
-| Local Beam Search | <img src="DuAnCaNhan/project/assets/gif/3/local_beam.gif" width="420" alt="Local Beam Search"> |
+| Simple Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/simple.gif" width="760" alt="Simple Hill Climbing"> |
+| Steepest-Ascent Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/steepes.gif" width="760" alt="Steepest Hill Climbing"> |
+| Stochastic Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/stochastic.gif" width="760" alt="Stochastic Hill Climbing"> |
+| Random-Restart Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/random_restart.gif" width="760" alt="Random Restart Hill Climbing"> |
+| Simulated Annealing | <img src="DuAnCaNhan/project/assets/gif/3/simulated.gif" width="760" alt="Simulated Annealing"> |
+| Local Beam Search | <img src="DuAnCaNhan/project/assets/gif/3/local_beam.gif" width="760" alt="Local Beam Search"> |
 
 #### So sánh thuật toán
 
@@ -275,9 +275,9 @@ Nhóm này mô phỏng trường hợp agent không biết đầy đủ trạng 
 
 | Thuật toán | GIF |
 |---|---|
-| Unobservable Search | <img src="DuAnCaNhan/project/assets/gif/4/unobservable.gif" width="420" alt="Unobservable Search"> |
-| Partial-Observation Search | <img src="DuAnCaNhan/project/assets/gif/4/partial.gif" width="420" alt="Partial Observation Search"> |
-| AND-OR Graph Search | <img src="DuAnCaNhan/project/assets/gif/4/and_or.gif" width="420" alt="AND-OR Graph Search"> |
+| Unobservable Search | <img src="DuAnCaNhan/project/assets/gif/4/unobservable.gif" width="760" alt="Unobservable Search"> |
+| Partial-Observation Search | <img src="DuAnCaNhan/project/assets/gif/4/partial.gif" width="760" alt="Partial Observation Search"> |
+| AND-OR Graph Search | <img src="DuAnCaNhan/project/assets/gif/4/and_or.gif" width="760" alt="AND-OR Graph Search"> |
 
 #### Hình ảnh minh họa và so sánh
 
@@ -315,10 +315,10 @@ Nhóm CSP được minh họa bằng bài toán **tô màu bản đồ TP.HCM**.
 
 | Thuật toán | GIF |
 |---|---|
-| Backtracking | <img src="DuAnCaNhan/project/assets/gif/5/backtracking.gif" width="420" alt="Backtracking"> |
-| Forward Checking | <img src="DuAnCaNhan/project/assets/gif/5/forward.gif" width="420" alt="Forward Checking"> |
-| AC-3 | <img src="DuAnCaNhan/project/assets/gif/5/ac3.gif" width="420" alt="AC-3"> |
-| Min-Conflicts | <img src="DuAnCaNhan/project/assets/gif/5/min.gif" width="420" alt="Min Conflicts"> |
+| Backtracking | <img src="DuAnCaNhan/project/assets/gif/5/backtracking.gif" width="760" alt="Backtracking"> |
+| Forward Checking | <img src="DuAnCaNhan/project/assets/gif/5/forward.gif" width="760" alt="Forward Checking"> |
+| AC-3 | <img src="DuAnCaNhan/project/assets/gif/5/ac3.gif" width="760" alt="AC-3"> |
+| Min-Conflicts | <img src="DuAnCaNhan/project/assets/gif/5/min.gif" width="760" alt="Min Conflicts"> |
 
 #### So sánh thuật toán
 
@@ -353,9 +353,9 @@ Nhóm này được minh họa bằng trò chơi **cờ caro 3x3**. Người ch�
 
 | Thuật toán | GIF |
 |---|---|
-| Minimax | <img src="DuAnCaNhan/project/assets/gif/6/minimax.gif" width="420" alt="Minimax"> |
-| Alpha-Beta | <img src="DuAnCaNhan/project/assets/gif/6/alpha_beta.gif" width="420" alt="Alpha-Beta"> |
-| Expectimax | <img src="DuAnCaNhan/project/assets/gif/6/expectimax.gif" width="420" alt="Expectimax"> |
+| Minimax | <img src="DuAnCaNhan/project/assets/gif/6/minimax.gif" width="760" alt="Minimax"> |
+| Alpha-Beta | <img src="DuAnCaNhan/project/assets/gif/6/alpha_beta.gif" width="760" alt="Alpha-Beta"> |
+| Expectimax | <img src="DuAnCaNhan/project/assets/gif/6/expectimax.gif" width="760" alt="Expectimax"> |
 
 #### So sánh thuật toán
 
@@ -434,5 +434,3 @@ Khó khăn: Một số thuật toán rất trừu tượng, khó hiểu nên có
 MSSV: `24110372`  
 Môn học: `Trí tuệ nhân tạo`
 Giáo viên hướng dẫn: `Phan Thị Huyền Trang`
-
-
