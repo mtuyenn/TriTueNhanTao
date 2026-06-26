@@ -142,58 +142,25 @@ DuAnCaNhan/project/
 
 #### GIF minh họa
 
-**BFS 1**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/bfs1.gif" width="1000" alt="BFS 1">
-</p>
-
-**BFS 2 (Optimized)**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/bfs2.gif" width="1000" alt="BFS 2">
-</p>
-
-**DFS 1**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/dfs1.gif" width="1000" alt="DFS 1">
-</p>
-
-**DFS 2 (Optimized)**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/dfs2.gif" width="1000" alt="DFS 2">
-</p>
-
-**IDS 1**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/ids1.gif" width="1000" alt="IDS 1">
-</p>
-
-**IDS 2 (Optimized)**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/ids2.gif" width="1000" alt="IDS 2">
-</p>
-
-**UCS**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/1/ucs.gif" width="1000" alt="UCS">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| BFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/bfs1.gif" width="760" alt="BFS 1"> |
+| BFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/bfs2.gif" width="760" alt="BFS 2"> |
+| DFS 1 | <img src="DuAnCaNhan/project/assets/gif/1/dfs1.gif" width="760" alt="DFS 1"> |
+| DFS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/dfs2.gif" width="760" alt="DFS 2"> |
+| IDS 1 | <img src="DuAnCaNhan/project/assets/gif/1/ids1.gif" width="760" alt="IDS 1"> |
+| IDS 2 (Optimized) | <img src="DuAnCaNhan/project/assets/gif/1/ids2.gif" width="760" alt="IDS 2"> |
+| UCS | <img src="DuAnCaNhan/project/assets/gif/1/ucs.gif" width="760" alt="UCS"> |
 
 #### So sánh thuật toán
 
 | Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/1/1_time.png" width="390" alt="Uninformed time"> | <img src="DuAnCaNhan/project/assets/images/1/1_node.png" width="390" alt="Uninformed nodes"> |
+| <img src="DuAnCaNhan/project/assets/images/1/1_time.png" width="500" alt="Uninformed time"> | <img src="DuAnCaNhan/project/assets/images/1/1_node.png" width="500" alt="Uninformed nodes"> |
 
 | Bộ nhớ | Độ dài đường đi |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/1/1_mem.png" width="390" alt="Uninformed memory"> | <img src="DuAnCaNhan/project/assets/images/1/1_length.png" width="390" alt="Uninformed path length"> |
+| <img src="DuAnCaNhan/project/assets/images/1/1_mem.png" width="500" alt="Uninformed memory"> | <img src="DuAnCaNhan/project/assets/images/1/1_length.png" width="500" alt="Uninformed path length"> |
 
 **Nhận xét:**
 
@@ -220,34 +187,21 @@ Nhóm này sử dụng heuristic để ưu tiên trạng thái có triển vọn
 
 #### GIF minh họa
 
-**Greedy Search**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/2/greedy.gif" width="1000" alt="Greedy Search">
-</p>
-
-**A***
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/2/a_star.gif" width="1000" alt="A star">
-</p>
-
-**IDA***
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/2/ida_star.gif" width="1000" alt="IDA star">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| Greedy Search | <img src="DuAnCaNhan/project/assets/gif/2/greedy.gif" width="760" alt="Greedy Search"> |
+| A* | <img src="DuAnCaNhan/project/assets/gif/2/a_star.gif" width="760" alt="A star"> |
+| IDA* | <img src="DuAnCaNhan/project/assets/gif/2/ida_star.gif" width="760" alt="IDA star"> |
 
 #### So sánh thuật toán
 
 | Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/2/2_time.png" width="390" alt="Informed time"> | <img src="DuAnCaNhan/project/assets/images/2/2_node.png" width="390" alt="Informed nodes"> |
+| <img src="DuAnCaNhan/project/assets/images/2/2_time.png" width="500" alt="Informed time"> | <img src="DuAnCaNhan/project/assets/images/2/2_node.png" width="500" alt="Informed nodes"> |
 
 | Bộ nhớ | Độ dài đường đi |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/2/2_mem.png" width="390" alt="Informed memory"> | <img src="DuAnCaNhan/project/assets/images/2/2_length.png" width="390" alt="Informed path length"> |
+| <img src="DuAnCaNhan/project/assets/images/2/2_mem.png" width="500" alt="Informed memory"> | <img src="DuAnCaNhan/project/assets/images/2/2_length.png" width="500" alt="Informed path length"> |
 
 **Nhận xét:**
 
@@ -272,52 +226,24 @@ Nhóm này cải thiện trạng thái hiện tại theo heuristic thay vì mở
 
 #### GIF minh họa
 
-**Simple Hill Climbing**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/simple.gif" width="1000" alt="Simple Hill Climbing">
-</p>
-
-**Steepest-Ascent Hill Climbing**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/steepes.gif" width="1000" alt="Steepest Hill Climbing">
-</p>
-
-**Stochastic Hill Climbing**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/stochastic.gif" width="1000" alt="Stochastic Hill Climbing">
-</p>
-
-**Random-Restart Hill Climbing**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/random_restart.gif" width="1000" alt="Random Restart Hill Climbing">
-</p>
-
-**Simulated Annealing**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/simulated.gif" width="1000" alt="Simulated Annealing">
-</p>
-
-**Local Beam Search**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/3/local_beam.gif" width="1000" alt="Local Beam Search">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| Simple Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/simple.gif" width="760" alt="Simple Hill Climbing"> |
+| Steepest-Ascent Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/steepes.gif" width="760" alt="Steepest Hill Climbing"> |
+| Stochastic Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/stochastic.gif" width="760" alt="Stochastic Hill Climbing"> |
+| Random-Restart Hill Climbing | <img src="DuAnCaNhan/project/assets/gif/3/random_restart.gif" width="760" alt="Random Restart Hill Climbing"> |
+| Simulated Annealing | <img src="DuAnCaNhan/project/assets/gif/3/simulated.gif" width="760" alt="Simulated Annealing"> |
+| Local Beam Search | <img src="DuAnCaNhan/project/assets/gif/3/local_beam.gif" width="760" alt="Local Beam Search"> |
 
 #### So sánh thuật toán
 
 | Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/3/3_time.png" width="390" alt="Local search time"> | <img src="DuAnCaNhan/project/assets/images/3/3_node.png" width="390" alt="Local search nodes"> |
+| <img src="DuAnCaNhan/project/assets/images/3/3_time.png" width="500" alt="Local search time"> | <img src="DuAnCaNhan/project/assets/images/3/3_node.png" width="500" alt="Local search nodes"> |
 
 | Bộ nhớ | Độ dài đường đi |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/3/3_mem.png" width="390" alt="Local search memory"> | <img src="DuAnCaNhan/project/assets/images/3/3_length.png" width="390" alt="Local search path length"> |
+| <img src="DuAnCaNhan/project/assets/images/3/3_mem.png" width="500" alt="Local search memory"> | <img src="DuAnCaNhan/project/assets/images/3/3_length.png" width="500" alt="Local search path length"> |
 
 **Nhận xét:**
 
@@ -347,30 +273,17 @@ Nhóm này mô phỏng trường hợp agent không biết đầy đủ trạng 
 
 #### GIF minh họa
 
-**Unobservable Search**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/4/unobservable.gif" width="1000" alt="Unobservable Search">
-</p>
-
-**Partial-Observation Search**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/4/partial.gif" width="1000" alt="Partial Observation Search">
-</p>
-
-**AND-OR Graph Search**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/4/and_or.gif" width="1000" alt="AND-OR Graph Search">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| Unobservable Search | <img src="DuAnCaNhan/project/assets/gif/4/unobservable.gif" width="760" alt="Unobservable Search"> |
+| Partial-Observation Search | <img src="DuAnCaNhan/project/assets/gif/4/partial.gif" width="760" alt="Partial Observation Search"> |
+| AND-OR Graph Search | <img src="DuAnCaNhan/project/assets/gif/4/and_or.gif" width="760" alt="AND-OR Graph Search"> |
 
 #### Hình ảnh minh họa và so sánh
 
 | Biểu đồ thời gian | Minh họa belief state |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/4/4_time.png" width="390" alt="Complex environment time"> | <img src="DuAnCaNhan/project/assets/images/4/4_.png" width="390" alt="Complex environment comparison"> |
+| <img src="DuAnCaNhan/project/assets/images/4/4_time.png" width="500" alt="Complex environment time"> | <img src="DuAnCaNhan/project/assets/images/4/4_.png" width="500" alt="Complex environment comparison"> |
 
 **Nhận xét:**
 
@@ -400,40 +313,22 @@ Nhóm CSP được minh họa bằng bài toán **tô màu bản đồ TP.HCM**.
 
 #### GIF minh họa
 
-**Backtracking**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/5/backtracking.gif" width="1000" alt="Backtracking">
-</p>
-
-**Forward Checking**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/5/forward.gif" width="1000" alt="Forward Checking">
-</p>
-
-**AC-3**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/5/ac3.gif" width="1000" alt="AC-3">
-</p>
-
-**Min-Conflicts**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/5/min.gif" width="1000" alt="Min Conflicts">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| Backtracking | <img src="DuAnCaNhan/project/assets/gif/5/backtracking.gif" width="760" alt="Backtracking"> |
+| Forward Checking | <img src="DuAnCaNhan/project/assets/gif/5/forward.gif" width="760" alt="Forward Checking"> |
+| AC-3 | <img src="DuAnCaNhan/project/assets/gif/5/ac3.gif" width="760" alt="AC-3"> |
+| Min-Conflicts | <img src="DuAnCaNhan/project/assets/gif/5/min.gif" width="760" alt="Min Conflicts"> |
 
 #### So sánh thuật toán
 
 | Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/5/5_time.png" width="390" alt="CSP time"> | <img src="DuAnCaNhan/project/assets/images/5/5_node.png" width="390" alt="CSP nodes"> |
+| <img src="DuAnCaNhan/project/assets/images/5/5_time.png" width="500" alt="CSP time"> | <img src="DuAnCaNhan/project/assets/images/5/5_node.png" width="500" alt="CSP nodes"> |
 
 | Bộ nhớ | Số vùng đã tô |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/5/5_mem.png" width="390" alt="CSP memory"> | <img src="DuAnCaNhan/project/assets/images/5/5_length.png" width="390" alt="CSP assignments"> |
+| <img src="DuAnCaNhan/project/assets/images/5/5_mem.png" width="500" alt="CSP memory"> | <img src="DuAnCaNhan/project/assets/images/5/5_length.png" width="500" alt="CSP assignments"> |
 
 **Nhận xét:**
 
@@ -456,34 +351,21 @@ Nhóm này được minh họa bằng trò chơi **cờ caro 3x3**. Người ch�
 
 #### GIF minh họa
 
-**Minimax**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/6/minimax.gif" width="1000" alt="Minimax">
-</p>
-
-**Alpha-Beta**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/6/alpha_beta.gif" width="1000" alt="Alpha-Beta">
-</p>
-
-**Expectimax**
-
-<p align="center">
-  <img src="DuAnCaNhan/project/assets/gif/6/expectimax.gif" width="1000" alt="Expectimax">
-</p>
-
+| Thuật toán | GIF |
+|---|---|
+| Minimax | <img src="DuAnCaNhan/project/assets/gif/6/minimax.gif" width="760" alt="Minimax"> |
+| Alpha-Beta | <img src="DuAnCaNhan/project/assets/gif/6/alpha_beta.gif" width="760" alt="Alpha-Beta"> |
+| Expectimax | <img src="DuAnCaNhan/project/assets/gif/6/expectimax.gif" width="760" alt="Expectimax"> |
 
 #### So sánh thuật toán
 
 | Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/6/6_time.png" width="390" alt="Adversarial time"> | <img src="DuAnCaNhan/project/assets/images/6/6_node.png" width="390" alt="Adversarial nodes"> |
+| <img src="DuAnCaNhan/project/assets/images/6/6_time.png" width="500" alt="Adversarial time"> | <img src="DuAnCaNhan/project/assets/images/6/6_node.png" width="500" alt="Adversarial nodes"> |
 
 | Bộ nhớ | Số ô còn lại |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/6/6_mem.png" width="390" alt="Adversarial memory"> | <img src="DuAnCaNhan/project/assets/images/6/6_length.png" width="390" alt="Adversarial path length"> |
+| <img src="DuAnCaNhan/project/assets/images/6/6_mem.png" width="500" alt="Adversarial memory"> | <img src="DuAnCaNhan/project/assets/images/6/6_length.png" width="500" alt="Adversarial path length"> |
 
 **Nhận xét:**
 
