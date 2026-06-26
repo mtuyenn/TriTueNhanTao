@@ -279,11 +279,16 @@ Nhóm này mô phỏng trường hợp agent không biết đầy đủ trạng 
 | Partial-Observation Search | <img src="DuAnCaNhan/project/assets/gif/4/partial.gif" width="760" alt="Partial Observation Search"> |
 | AND-OR Graph Search | <img src="DuAnCaNhan/project/assets/gif/4/and_or.gif" width="760" alt="AND-OR Graph Search"> |
 
-#### Hình ảnh minh họa và so sánh
+#### So sánh thuật toán
 
-| Biểu đồ thời gian | Minh họa belief state |
+| Thời gian | Số node đã xét |
 |---|---|
-| <img src="DuAnCaNhan/project/assets/images/4/4_time.png" width="500" alt="Complex environment time"> | <img src="DuAnCaNhan/project/assets/images/4/4_.png" width="500" alt="Complex environment comparison"> |
+| <img src="DuAnCaNhan/project/assets/images/4/4_time.png" width="500" alt="Complex environment time"> | <img src="DuAnCaNhan/project/assets/images/4/4_node.png" width="500" alt="Complex environment nodes"> |
+
+| Bộ nhớ | Độ dài đường đi |
+|---|---|
+| <img src="DuAnCaNhan/project/assets/images/4/4_mem.png" width="500" alt="Complex environment memory"> | <img src="DuAnCaNhan/project/assets/images/4/4_length.png" width="500" alt="Complex environment path length"> |
+
 
 **Nhận xét:**
 
@@ -433,7 +438,12 @@ Khó khăn: Một số thuật toán rất trừu tượng, khó hiểu nên có
 
 ## Tác giả
 
-**Ninh Nguyễn Minh Tuyên**  
-MSSV: `24110372`  
-Môn học: `Trí tuệ nhân tạo`
-Giáo viên hướng dẫn: `Phan Thị Huyền Trang`
+#### Tác giả
+
+**Ninh Nguyễn Minh Tuyên**
+
+MSSV: `24110372`
+
+**Môn học** `Trí tuệ nhân tạo`
+
+**Giáo viên hướng dẫn** `Phan Thị Huyền Trang`
