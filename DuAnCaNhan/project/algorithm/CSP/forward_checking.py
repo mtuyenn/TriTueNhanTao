@@ -12,7 +12,11 @@ def forward_checking_map_coloring(region_order=None, color_count=4):
     assignments = {}
 
     # tạo domain cho từng vùng
-    domains = {region: list(range(color_count)) for region in order}
+    domains = {}
+    for region in order:
+        domains[region] = []
+        for color_index in range(color_count):
+            domains[region].append(color_index)
 
     yield {
         "action": "start",
@@ -60,7 +64,11 @@ def forward_checking_map_coloring(region_order=None, color_count=4):
             fc_success, pruned = forward_check(region, color_index, unassigned_regions)
             
             if not fc_success:
-                failed_neighbor = [n for n in unassigned_regions if len(domains[n]) == 0][0]
+                failed_neighbor = None
+                for n in unassigned_regions:
+                    if len(domains[n]) == 0:
+                        failed_neighbor = n
+                        break
                 yield {
                     "action": "reject",
                     "assignments": dict(assignments),

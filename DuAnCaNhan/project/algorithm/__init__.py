@@ -14,3 +14,6 @@ from .CSP.backtracking import HCM_REGIONS, MAP_COLORS, backtracking_map_coloring
 from .CSP.forward_checking import forward_checking_map_coloring
 from .CSP.ac3 import ac3_map_coloring
 from .CSP.min_conflicts import min_conflicts_map_coloring
+from .adversarial_search.minimax import create_board as create_caro_board, winner as caro_winner, minimax_decision
+from .adversarial_search.alpha_beta import alpha_beta_decision
+from .adversarial_search.expectimax import expectimax_decision

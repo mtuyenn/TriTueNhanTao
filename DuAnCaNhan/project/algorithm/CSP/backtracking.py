@@ -61,7 +61,6 @@ HCM_ADJACENCY = {
 
 
 def backtracking_map_coloring(region_order=None, color_count=4):
-    """Yield every assignment, rejection and backtrack in the CSP search."""
     if not 1 <= color_count <= len(MAP_COLORS):
         raise ValueError("color_count must be between 1 and 4")
 
@@ -86,11 +85,10 @@ def backtracking_map_coloring(region_order=None, color_count=4):
 
         region = order[index]
         for color_index in range(color_count):
-            conflicts = [
-                neighbor
-                for neighbor in HCM_ADJACENCY[region]
-                if assignments.get(neighbor) == color_index
-            ]
+            conflicts = []
+            for neighbor in HCM_ADJACENCY[region]:
+                if assignments.get(neighbor) == color_index:
+                    conflicts.append(neighbor)
             color_name = MAP_COLORS[color_index][0]
 
             if conflicts:

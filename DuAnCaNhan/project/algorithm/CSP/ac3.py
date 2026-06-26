@@ -12,7 +12,11 @@ def ac3_map_coloring(region_order=None, color_count=4):
     if len(order) != len(HCM_REGIONS) or set(order) != set(HCM_REGIONS):
         raise ValueError("region_order must contain every HCM region exactly once")
 
-    domains = {region: set(range(color_count)) for region in order}
+    domains = {}
+    for region in order:
+        domains[region] = set()
+        for color in range(color_count):
+            domains[region].add(color)
     assignments = {}
 
     yield {
@@ -25,7 +29,12 @@ def ac3_map_coloring(region_order=None, color_count=4):
         removed = set()
         for x in tuple(domains[xi]):
             # Constraint for adjacent regions: x != y.
-            if not any(x != y for y in domains[xj]):
+            has_valid_color = False
+            for y in domains[xj]:
+                if x != y:
+                    has_valid_color = True
+                    break
+            if not has_valid_color:
                 domains[xi].remove(x)
                 removed.add(x)
         return removed
@@ -38,7 +47,10 @@ def ac3_map_coloring(region_order=None, color_count=4):
             if not removed:
                 continue
 
-            removed_names = ", ".join(MAP_COLORS[c][0] for c in sorted(removed))
+            removed_names_list = []
+            for c in sorted(removed):
+                removed_names_list.append(MAP_COLORS[c][0])
+            removed_names = ", ".join(removed_names_list)
             yield {
                 "action": "revise", "assignments": dict(assignments),
                 "region": xi, "color": next(iter(removed)), "done": False,
@@ -56,11 +68,20 @@ def ac3_map_coloring(region_order=None, color_count=4):
             return True
 
         # MRV, with the selected order as a stable tie-breaker.
-        unassigned = [r for r in order if r not in assignments]
-        region = min(unassigned, key=lambda r: len(domains[r]))
+        unassigned = []
+        for r in order:
+            if r not in assignments:
+                unassigned.append(r)
+
+        region = unassigned[0]
+        for r in unassigned:
+            if len(domains[r]) < len(domains[region]):
+                region = r
 
         for color in sorted(domains[region]):
-            snapshot = {r: set(values) for r, values in domains.items()}
+            snapshot = {}
+            for r, values in domains.items():
+                snapshot[r] = set(values)
             assignments[region] = color
             domains[region] = {color}
             yield {
@@ -70,9 +91,10 @@ def ac3_map_coloring(region_order=None, color_count=4):
                 "log": f"Gán {region} = {MAP_COLORS[color][0]}, đưa các cung liên quan vào hàng đợi.",
             }
 
-            consistent = yield from enforce_ac3(
-                (neighbor, region) for neighbor in HCM_ADJACENCY[region]
-            )
+            arcs = []
+            for neighbor in HCM_ADJACENCY[region]:
+                arcs.append((neighbor, region))
+            consistent = yield from enforce_ac3(arcs)
             if consistent and (yield from solve()):
                 return True
 

@@ -4,7 +4,6 @@ from .backtracking import HCM_ADJACENCY, HCM_REGIONS, MAP_COLORS
 
 
 def min_conflicts_map_coloring(region_order=None, color_count=4, max_steps=2000, seed=None):
-    """Yield the initial complete assignment and every conflict-repair step."""
     if not 1 <= color_count <= len(MAP_COLORS):
         raise ValueError("color_count must be between 1 and 4")
     if max_steps < 1:
@@ -15,10 +14,16 @@ def min_conflicts_map_coloring(region_order=None, color_count=4, max_steps=2000,
         raise ValueError("region_order must contain every HCM region exactly once")
 
     rng = random.Random(seed)
-    assignments = {region: rng.randrange(color_count) for region in order}
+    assignments = {}
+    for region in order:
+        assignments[region] = rng.randrange(color_count)
 
     def conflicts(region, color):
-        return sum(assignments[neighbor] == color for neighbor in HCM_ADJACENCY[region])
+        count = 0
+        for neighbor in HCM_ADJACENCY[region]:
+            if assignments[neighbor] == color:
+                count += 1
+        return count
 
     yield {
         "action": "start", "assignments": dict(assignments),
@@ -27,7 +32,10 @@ def min_conflicts_map_coloring(region_order=None, color_count=4, max_steps=2000,
     }
 
     for step_number in range(1, max_steps + 1):
-        conflicted = [r for r in order if conflicts(r, assignments[r]) > 0]
+        conflicted = []
+        for r in order:
+            if conflicts(r, assignments[r]) > 0:
+                conflicted.append(r)
         if not conflicted:
             yield {
                 "action": "done", "assignments": dict(assignments),
@@ -37,9 +45,19 @@ def min_conflicts_map_coloring(region_order=None, color_count=4, max_steps=2000,
             return
 
         region = rng.choice(conflicted)
-        scores = {color: conflicts(region, color) for color in range(color_count)}
-        best_score = min(scores.values())
-        best_colors = [color for color, score in scores.items() if score == best_score]
+        scores = {}
+        for color in range(color_count):
+            scores[color] = conflicts(region, color)
+
+        best_score = None
+        for color in scores:
+            if best_score is None or scores[color] < best_score:
+                best_score = scores[color]
+
+        best_colors = []
+        for color in scores:
+            if scores[color] == best_score:
+                best_colors.append(color)
         color = rng.choice(best_colors)
         old_color = assignments[region]
         assignments[region] = color

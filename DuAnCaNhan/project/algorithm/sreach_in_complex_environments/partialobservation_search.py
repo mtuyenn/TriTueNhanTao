@@ -1,63 +1,56 @@
-import random
 from ..informed_search.a_star import A_star
 
+
 def partialobservation_search(cases, cols, rows):
+    observed_positions = cases[0].get("known_positions", []) if cases else []
     yield {
         "current": None,
         "frontier": [],
         "explored": set(),
-        "log": f"Biết trước vị trí của partialobservation: {[c['start_state'] for c in cases]}"
+        "log": f"Biết trước 2 ô quan sát: {observed_positions}",
     }
 
-    initial_bs = set()
-    for case in cases:
-        pos = case["start_state"]
-        guess_dirties = tuple(sorted(case["current_dirties"]))
-        initial_bs.add((pos, guess_dirties))
+    initial_bs = []
+    for case_index, case in enumerate(cases):
+        start = case["start_state"]
+        dirties = tuple(sorted(case["current_dirties"]))
+        initial_bs.append((case_index, start, dirties))
 
     yield {
         "current": None,
         "frontier": [],
         "explored": set(),
-        "log": f"Tập trạng thái ban đầu có {len(initial_bs)} vị trí có thể, các vị trí đã biết đều không có rác."
+        "log": f"Tập BS có {len(initial_bs)} giả định; 2 ô quan sát giống nhau trong mọi giả định.",
     }
 
     all_paths = []
-
-    for state in initial_bs:
-        start_guess, current_dirties = state
-        
+    for case_index, start, dirties in initial_bs:
         yield {
             "current": None,
             "frontier": [],
             "explored": set(),
-            "log": f"--- Chạy A* giả định robot xuất phát tại {start_guess} ---"
+            "log": f"--- Chạy A* cho giả định {case_index + 1}, robot xuất phát tại {start} ---",
         }
-        
-        # Thực hiện thuật toán A*
-        a_star_gen = A_star(start_guess, current_dirties, cols, rows)
-        
-        path_for_this_state = []
-        for step in a_star_gen:
+
+        path_for_case = []
+        for step in A_star(start, dirties, cols, rows):
             if "log" in step:
-                step["log"] = f"[Giả định {start_guess}] " + step["log"]
-                
+                step["log"] = f"[Giả định {case_index + 1}] {step['log']}"
+
             if step.get("done"):
-                path_for_this_state = step.get("path", [])
-                
+                path_for_case = step.get("path", [])
                 yield {
                     "current": step.get("current"),
                     "frontier": step.get("frontier", []),
                     "explored": step.get("explored", set()),
-                    "log": f"[Giả định {start_guess}] Tìm thấy đường đi: {len(path_for_this_state)-1} bước!"
+                    "log": f"[Giả định {case_index + 1}] Tìm thấy đường đi: {len(path_for_case) - 1} bước!",
                 }
             else:
                 yield step
-                
-        all_paths.append((start_guess, path_for_this_state))
 
-    final_path = all_paths[0][1] if all_paths else []
+        all_paths.append({"case_index": case_index, "start": start, "path": path_for_case})
 
+    final_path = all_paths[0]["path"] if all_paths else []
     yield {
         "current": None,
         "frontier": [],
@@ -65,5 +58,5 @@ def partialobservation_search(cases, cols, rows):
         "done": True,
         "path": final_path,
         "all_paths": all_paths,
-        "log": f"Hoàn tất duyệt {len(initial_bs)} giả định tưởng tượng! Bắt đầu mô phỏng robot..."
+        "log": f"Hoàn tất lập kế hoạch cho {len(initial_bs)} trạng thái trong BS. Bắt đầu mô phỏng...",
     }

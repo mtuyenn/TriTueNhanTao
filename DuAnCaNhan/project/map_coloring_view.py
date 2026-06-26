@@ -7,7 +7,7 @@ from algorithm.CSP.backtracking import MAP_COLORS, REGION_SEEDS
 
 
 class HCMMapRenderer:
-    def __init__(self, image_path, max_display_size=(590, 421)):
+    def __init__(self, image_path, max_display_size=(620, 332)):
         self.base_surface = pygame.image.load(image_path).convert()
         source_width, source_height = self.base_surface.get_size()
         max_width, max_height = max_display_size
